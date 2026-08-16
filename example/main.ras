@@ -1,0 +1,7 @@
+[description]
+Player {
+    name: str,
+}
+
+[game]
+new player Player("John doe")
