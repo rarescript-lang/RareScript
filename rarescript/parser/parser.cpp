@@ -164,10 +164,10 @@ std::vector<Ast> Parser::parse() {
                 // Segment inside a segment is not allowed
                 current_vec = &asts;
 
-                current_vec->emplace_back(SegmentBlock(ident.lexeme, token.location.extend(rb.location)));
+                current_vec->emplace_back(make_ast<SegmentBlock>(ident.lexeme, token.location.extend(rb.location)));
 
                 // Now every ast below this segment are belong to this segment
-                current_vec = &std::get<SegmentBlock>(current_vec->back()).children;
+                current_vec = &std::get<std::unique_ptr<SegmentBlock> >(current_vec->back().node)->children;
                 break;
             }
 
@@ -179,7 +179,7 @@ std::vector<Ast> Parser::parse() {
                         if (peek() == TokenKind::LeftParenthesis) {
                             // operand() consumes left parenthesis and ensure it's pair is present
                             auto value = operand();
-                            current_vec->emplace_back(NewDeclaration(ident, type, std::move(value)));
+                            current_vec->emplace_back(make_ast<NewDeclaration>(ident, type, std::move(value)));
                         } else {
                             // TODO:
                             // - This condition is entered because there is no left parenthesis
@@ -192,7 +192,7 @@ std::vector<Ast> Parser::parse() {
                     case KeywordKind::Set: {
                         const auto ident = expect(TokenKind::Identifier);
                         auto value = parse_expr(static_cast<uint8_t>(Precedence::LOWEST));
-                        current_vec->emplace_back(SetDeclaration(ident, std::move(value)));
+                        current_vec->emplace_back(make_ast<SetDeclaration>(ident, std::move(value)));
                     }
                 }
                 break;

@@ -180,10 +180,6 @@ inline BinaryExpr::BinaryExpr(BinaryExpr &&) noexcept = default;
 
 inline BinaryExpr &BinaryExpr::operator=(BinaryExpr &&) noexcept = default;
 
-// ============================================================
-// Factory
-// ============================================================
-
 template<typename T, typename... Args>
 std::unique_ptr<Expr> make_expr(Args &&... args) {
     return std::make_unique<Expr>(
@@ -191,13 +187,5 @@ std::unique_ptr<Expr> make_expr(Args &&... args) {
         std::forward<Args>(args)...
     );
 }
-
-template<class... Ts>
-struct overloaded : Ts... {
-    using Ts::operator()...;
-};
-
-template<class... Ts>
-overloaded(Ts...) -> overloaded<Ts...>;
 
 #endif // RPGEN_EXPR_H

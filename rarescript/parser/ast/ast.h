@@ -4,53 +4,166 @@
 
 #ifndef RPGEN_AST_H
 #define RPGEN_AST_H
+
+#include <format>
+#include <memory>
 #include <string_view>
+#include <type_traits>
+#include <utility>
 #include <variant>
 #include <vector>
 
 #include "token.h"
 #include "../expr/expr.h"
 
-class NewDeclaration {
+struct Ast;
+
+struct SegmentBlock;
+struct NewDeclaration;
+struct SetDeclaration;
+
+
+struct NewDeclaration {
     Token ident;
     Token type;
     std::unique_ptr<Expr> value;
 
-public:
-    explicit NewDeclaration(const Token &ident, const Token &type, std::unique_ptr<Expr> value) : ident(ident),
-        type(type),
-        value(std::move(value)) {
+    NewDeclaration(
+        const Token &ident,
+        const Token &type,
+        std::unique_ptr<Expr> value
+    )
+        : ident(ident),
+          type(type),
+          value(std::move(value)) {
     }
+
+    NewDeclaration(const NewDeclaration &) = delete;
+
+    NewDeclaration &operator=(const NewDeclaration &) = delete;
+
+    NewDeclaration(NewDeclaration &&) noexcept = default;
+
+    NewDeclaration &operator=(NewDeclaration &&) noexcept = default;
 };
 
-class SetDeclaration {
+struct SetDeclaration {
     Token ident;
     std::unique_ptr<Expr> value;
 
-public:
-    explicit SetDeclaration(const Token &ident, std::unique_ptr<Expr> value) : ident(ident),
-                                                                               value(std::move(value)) {
+    SetDeclaration(
+        const Token &ident,
+        std::unique_ptr<Expr> value
+    )
+        : ident(ident),
+          value(std::move(value)) {
     }
+
+    SetDeclaration(const SetDeclaration &) = delete;
+
+    SetDeclaration &operator=(const SetDeclaration &) = delete;
+
+    SetDeclaration(SetDeclaration &&) noexcept = default;
+
+    SetDeclaration &operator=(SetDeclaration &&) noexcept = default;
 };
 
-class SegmentBlock;
 
-using Ast = std::variant<
-    SegmentBlock,
-    NewDeclaration,
-    SetDeclaration
+using AstNode = std::variant<
+    std::unique_ptr<SegmentBlock>,
+    std::unique_ptr<NewDeclaration>,
+    std::unique_ptr<SetDeclaration>
 >;
 
-class SegmentBlock {
-    std::string_view name;
-    SourceLocation location;
+struct Ast {
+    AstNode node;
 
-public:
-    explicit SegmentBlock(const std::string_view name,
-                          const SourceLocation &location) noexcept : name(name), location(location) {
+    template<typename T, typename... Args>
+    explicit Ast(
+        std::in_place_type_t<T>,
+        Args &&... args
+    )
+        : node(
+            std::make_unique<T>(
+                std::forward<Args>(args)...
+            )
+        ) {
     }
 
-    std::vector<Ast> children{};
+    explicit Ast(AstNode node)
+        : node(std::move(node)) {
+    }
+
+    Ast(Ast &&) noexcept = default;
+
+    Ast &operator=(Ast &&) noexcept = default;
+
+    Ast(const Ast &) = delete;
+
+    Ast &operator=(const Ast &) = delete;
 };
 
-#endif //RPGEN_AST_H
+struct SegmentBlock {
+    std::string_view name;
+    SourceLocation location;
+    std::vector<Ast> children;
+
+    SegmentBlock(
+        const std::string_view name,
+        const SourceLocation &location
+    )
+        : name(name),
+          location(location) {
+    }
+
+    SegmentBlock(SegmentBlock &&) noexcept = default;
+
+    SegmentBlock &operator=(SegmentBlock &&) noexcept = default;
+
+    SegmentBlock(const SegmentBlock &) = delete;
+
+    SegmentBlock &operator=(const SegmentBlock &) = delete;
+};
+
+template<>
+struct std::formatter<Ast> : std::formatter<std::string_view> {
+    static auto format(const Ast &ast, std::format_context &ctx) {
+        return std::visit(
+            [&]<typename T0>(const T0 &ptr) {
+                using T = std::decay_t<T0>::element_type;
+
+                if constexpr (std::is_same_v<T, SegmentBlock>) {
+                    return std::format_to(
+                        ctx.out(),
+                        "segment {}",
+                        ptr->name
+                    );
+                } else if constexpr (std::is_same_v<T, NewDeclaration>) {
+                    return std::format_to(
+                        ctx.out(),
+                        "new {} {}",
+                        ptr->ident.lexeme,
+                        ptr->type.lexeme
+                    );
+                } else if constexpr (std::is_same_v<T, SetDeclaration>) {
+                    return std::format_to(
+                        ctx.out(),
+                        "set {}",
+                        ptr->ident.lexeme
+                    );
+                }
+            },
+            ast.node
+        );
+    }
+};
+
+template<typename T, typename... Args>
+Ast make_ast(Args &&... args) {
+    return Ast(
+        std::in_place_type<T>,
+        std::forward<Args>(args)...
+    );
+}
+
+#endif // RPGEN_AST_H
