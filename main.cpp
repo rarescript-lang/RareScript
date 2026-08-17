@@ -4,7 +4,7 @@
 #include "rarescript/parser/parser.h"
 
 int main() {
-    const std::string source = "[description]";
+    const std::string source = "[game]\nnew age nat(12 + 2 * -3)";
     auto lexer = Lexer(source);
     auto tokens = lexer.tokenize();
     for (auto &t: tokens) {
