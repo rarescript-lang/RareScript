@@ -4,6 +4,7 @@ project(rpgen CXX)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+include(CTest)
 include(FetchContent)
 
 FetchContent_Declare(
@@ -13,6 +14,9 @@ FetchContent_Declare(
 )
 
 FetchContent_MakeAvailable(Catch2)
+
+list(APPEND CMAKE_MODULE_PATH ${catch2_SOURCE_DIR}/extras)
+include(Catch)
 
 add_library(rarescript_lib STATIC
         rarescript/lexer/lexer.cpp
@@ -44,6 +48,8 @@ target_link_libraries(rpgen_tests
         Catch2::Catch2WithMain
         rarescript_lib
 )
+
+catch_discover_tests(rpgen_tests)
 
 if (MINGW AND CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_link_libraries(rpgen PRIVATE stdc++exp)
