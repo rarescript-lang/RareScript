@@ -17,10 +17,7 @@ FetchContent_MakeAvailable(Catch2)
 add_library(rarescript_lib STATIC
         rarescript/lexer/lexer.cpp
         rarescript/parser/parser.cpp
-        rarescript/parser/ast/segment.cpp
         rarescript/parser/expr/expr.cpp
-        rarescript/parser/expr/binary_expr.cpp
-        rarescript/parser/expr/unary_expr.cpp
 )
 
 target_include_directories(rarescript_lib
