@@ -32,6 +32,10 @@ constexpr std::string_view to_string(const TokenKind kind) noexcept {
         case TokenKind::RightBrace: return "RightBrace";
         case TokenKind::LeftParenthesis: return "LeftParenthesis";
         case TokenKind::RightParenthesis: return "RightParenthesis";
+        case TokenKind::Plus: return "Plus";
+        case TokenKind::Minus: return "Minus";
+        case TokenKind::Star: return "Star";
+        case TokenKind::Slash: return "Slash";
         case TokenKind::Integer: return "Integer";
         case TokenKind::Identifier: return "Identifier";
         case TokenKind::Unknown: return "Unknown";
