@@ -6,10 +6,7 @@
 #define RPGEN_AST_H
 
 #include <format>
-#include <memory>
 #include <string_view>
-#include <type_traits>
-#include <utility>
 #include <variant>
 #include <vector>
 
@@ -133,23 +130,29 @@ struct std::formatter<Ast> : std::formatter<std::string_view> {
                 using T = std::decay_t<T0>::element_type;
 
                 if constexpr (std::is_same_v<T, SegmentBlock>) {
-                    return std::format_to(
-                        ctx.out(),
-                        "segment {}",
-                        ptr->name
-                    );
+                    auto out = ctx.out();
+
+                    std::format_to(out, "segment {}:", ptr->name);
+
+                    for (const auto &child: ptr->children) {
+                        std::format_to(out, "\n{}", child);
+                    }
+
+                    return out;
                 } else if constexpr (std::is_same_v<T, NewDeclaration>) {
                     return std::format_to(
                         ctx.out(),
-                        "new {} {}",
+                        "new {} {}({})",
                         ptr->ident.lexeme,
-                        ptr->type.lexeme
+                        ptr->type.lexeme,
+                        *ptr->value
                     );
                 } else if constexpr (std::is_same_v<T, SetDeclaration>) {
                     return std::format_to(
                         ctx.out(),
-                        "set {}",
-                        ptr->ident.lexeme
+                        "set {} {}",
+                        ptr->ident.lexeme,
+                        *ptr->value
                     );
                 }
             },

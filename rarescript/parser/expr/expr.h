@@ -180,6 +180,82 @@ inline BinaryExpr::BinaryExpr(BinaryExpr &&) noexcept = default;
 
 inline BinaryExpr &BinaryExpr::operator=(BinaryExpr &&) noexcept = default;
 
+template<>
+struct std::formatter<Expr> : std::formatter<std::string_view> {
+    static auto format(const Expr &expr, format_context &ctx) {
+        return std::visit(
+            [&]<typename T0>(const T0 &ptr) {
+                using T = std::decay_t<T0>::element_type;
+
+                if constexpr (std::is_same_v<T, BinaryExpr>) {
+                    auto out = std::format_to(
+                        ctx.out(),
+                        "("
+                    );
+
+                    out = std::format_to(
+                        out,
+                        "{} {} {}",
+                        *ptr->left,
+                        [&] {
+                            switch (ptr->op) {
+                                case OpKind::Add:
+                                    return std::string_view{"+"};
+                                case OpKind::Subtract:
+                                    return std::string_view{"-"};
+                                case OpKind::Multiply:
+                                    return std::string_view{"*"};
+                                case OpKind::Divide:
+                                    return std::string_view{"/"};
+                                default:
+                                    break;
+                            }
+
+                            return std::string_view{"?"};
+                        }(),
+                        *ptr->right
+                    );
+
+                    return std::format_to(out, ")");
+                } else if constexpr (std::is_same_v<T, UnaryExpr>) {
+                    auto op = [&] {
+                        switch (ptr->kind) {
+                            case UnaryKind::Negate:
+                                return std::string_view{"-"};
+                            case UnaryKind::Not:
+                                return std::string_view{"!"};
+                            default:
+                                break;
+                        }
+
+                        return std::string_view{"?"};
+                    }();
+
+                    return std::format_to(
+                        ctx.out(),
+                        "({}{})",
+                        op,
+                        *ptr->operand
+                    );
+                } else if constexpr (std::is_same_v<T, IdentifierExpr>) {
+                    return std::format_to(
+                        ctx.out(),
+                        "{}",
+                        ptr->ident.lexeme
+                    );
+                } else if constexpr (std::is_same_v<T, IntegerExpr>) {
+                    return std::format_to(
+                        ctx.out(),
+                        "{}",
+                        ptr->integer.lexeme
+                    );
+                }
+            },
+            expr.node
+        );
+    }
+};
+
 template<typename T, typename... Args>
 std::unique_ptr<Expr> make_expr(Args &&... args) {
     return std::make_unique<Expr>(
