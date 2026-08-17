@@ -23,7 +23,7 @@ TEST_CASE(
     "[parser]"
 ) {
     const std::string source =
-        "[game]";
+            "[game]";
 
     Lexer lexer(source);
     const auto tokens = lexer.tokenize();
@@ -39,8 +39,8 @@ TEST_CASE(
     "[parser]"
 ) {
     const std::string source =
-        "[game]\n"
-        "new exp nat(0)";
+            "[game]\n"
+            "new exp nat(0)";
 
     Lexer lexer(source);
     const auto tokens = lexer.tokenize();
@@ -56,9 +56,9 @@ TEST_CASE(
     "[parser]"
 ) {
     const std::string source =
-        "[game]\n"
-        "new exp nat(0)\n"
-        "set exp 100";
+            "[game]\n"
+            "new exp nat(0)\n"
+            "set exp 100";
 
     Lexer lexer(source);
     const auto tokens = lexer.tokenize();
@@ -74,9 +74,9 @@ TEST_CASE(
     "[parser]"
 ) {
     const std::string source =
-        "[game]\n"
-        "new exp nat(0)\n"
-        "set exp 100";
+            "[game]\n"
+            "new exp nat(0)\n"
+            "set exp 100";
 
     Lexer lexer(source);
     const auto tokens = lexer.tokenize();
@@ -92,8 +92,8 @@ TEST_CASE(
     "[parser][error]"
 ) {
     const std::string source =
-        "[game]\n"
-        "new exp";
+            "[game]\n"
+            "new exp";
 
     Lexer lexer(source);
     const auto tokens = lexer.tokenize();
@@ -111,8 +111,8 @@ TEST_CASE(
     "[parser][error]"
 ) {
     const std::string source =
-        "[game]\n"
-        "set exp";
+            "[game]\n"
+            "set exp";
 
     Lexer lexer(source);
     const auto tokens = lexer.tokenize();
@@ -130,8 +130,8 @@ TEST_CASE(
     "[parser][error]"
 ) {
     const std::string source =
-        "[game]\n"
-        "new exp nat";
+            "[game]\n"
+            "new exp nat";
 
     Lexer lexer(source);
     const auto tokens = lexer.tokenize();
