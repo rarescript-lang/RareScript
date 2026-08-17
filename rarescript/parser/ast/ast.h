@@ -6,6 +6,7 @@
 #define RPGEN_AST_H
 #include <string_view>
 #include <variant>
+#include <vector>
 
 #include "token.h"
 #include "../expr/expr.h"
@@ -16,17 +17,28 @@ class NewDeclaration {
     std::unique_ptr<Expr> value;
 
 public:
-    explicit NewDeclaration(const Token &ident, const Token &type, std::unique_ptr<Expr> value) : ident(ident), type(type),
+    explicit NewDeclaration(const Token &ident, const Token &type, std::unique_ptr<Expr> value) : ident(ident),
+        type(type),
         value(std::move(value)) {
     }
 };
 
+class SetDeclaration {
+    Token ident;
+    std::unique_ptr<Expr> value;
+
+public:
+    explicit SetDeclaration(const Token &ident, std::unique_ptr<Expr> value) : ident(ident),
+                                                                               value(std::move(value)) {
+    }
+};
 
 class SegmentBlock;
 
 using Ast = std::variant<
     SegmentBlock,
-    NewDeclaration
+    NewDeclaration,
+    SetDeclaration
 >;
 
 class SegmentBlock {

@@ -10,7 +10,7 @@
 
 
 [[nodiscard]]
-static KeywordKind token_to_keyword(const Token &token) noexcept {
+static KeywordKind token_to_keyword(const Token &token) {
     static const std::unordered_map<std::string_view, KeywordKind> keyword_map = {
         {"new", KeywordKind::New},
         {"set", KeywordKind::Set},
@@ -57,7 +57,7 @@ Token Parser::advance() noexcept {
     return tokens[idx++];
 }
 
-Token Parser::expect(const TokenKind kind) noexcept {
+Token Parser::expect(const TokenKind kind) {
     if (peek() == kind) {
         return advance();
     }
@@ -68,7 +68,7 @@ Token Parser::expect(const TokenKind kind) noexcept {
     throw std::runtime_error(std::format("Unexpected token `{}`", to_string(kind)));
 }
 
-std::unique_ptr<Expr> Parser::operand() noexcept {
+std::unique_ptr<Expr> Parser::operand() {
     switch (peek()) {
         case TokenKind::Identifier:
             return make_expr<IdentifierExpr>(advance());
@@ -102,9 +102,8 @@ std::unique_ptr<Expr> Parser::operand() noexcept {
     }
 }
 
-std::unique_ptr<Expr> Parser::parse_expr(const uint8_t min_precedence) noexcept {
+std::unique_ptr<Expr> Parser::parse_expr(const uint8_t min_precedence) {
     if (peek() == TokenKind::Eof) {
-        // return
         // TODO:
         // - This condition is entered when there is no expression (EOF)
         //
@@ -151,9 +150,9 @@ std::unique_ptr<Expr> Parser::parse_expr(const uint8_t min_precedence) noexcept 
     return left;
 }
 
-std::vector<Ast> Parser::parse() noexcept {
+std::vector<Ast> Parser::parse() {
     std::vector<Ast> asts{};
-    auto &current_vec = asts;
+    auto current_vec = &asts;
     while (idx < len) {
         switch (const auto token = advance(); token.kind) {
             // Start of a segment block
@@ -163,12 +162,12 @@ std::vector<Ast> Parser::parse() noexcept {
 
                 // Every segment must be the children of the global asts
                 // Segment inside a segment is not allowed
-                current_vec = asts;
+                current_vec = &asts;
 
-                current_vec.emplace_back(SegmentBlock(ident.lexeme, token.location.extend(rb.location)));
+                current_vec->emplace_back(SegmentBlock(ident.lexeme, token.location.extend(rb.location)));
 
                 // Now every ast below this segment are belong to this segment
-                current_vec = std::get<SegmentBlock>(current_vec.back()).children;
+                current_vec = &std::get<SegmentBlock>(current_vec->back()).children;
                 break;
             }
 
@@ -178,16 +177,32 @@ std::vector<Ast> Parser::parse() noexcept {
                         const auto ident = expect(TokenKind::Identifier);
                         const auto type = expect(TokenKind::Identifier);
                         if (peek() == TokenKind::LeftParenthesis) {
-                            current_vec.emplace_back(NewDeclaration(ident, type, operand()));
+                            // operand() consumes left parenthesis and ensure it's pair is present
+                            auto value = operand();
+                            current_vec->emplace_back(NewDeclaration(ident, type, std::move(value)));
+                        } else {
+                            // TODO:
+                            // - This condition is entered because there is no left parenthesis
+                            // - when a valid assignment require `T(...)` syntax
+                            //
+                            // Solution: Make this function report an error
                         }
                         break;
                     }
                     case KeywordKind::Set: {
                         const auto ident = expect(TokenKind::Identifier);
+                        auto value = parse_expr(static_cast<uint8_t>(Precedence::LOWEST));
+                        current_vec->emplace_back(SetDeclaration(ident, std::move(value)));
                     }
                 }
                 break;
             }
+            default:
+                // TODO:
+                // - This condition is entered because there is no valid statement
+                //
+                // Solution: Make this function report an error
+                throw std::runtime_error("Invalid start of statement");
         }
     }
     return asts;

@@ -20,17 +20,17 @@ class Parser {
 
     [[nodiscard]] Token advance() noexcept;
 
-    [[nodiscard]] Token expect(TokenKind kind) noexcept;
+    [[nodiscard]] Token expect(TokenKind kind);
 
-    std::unique_ptr<Expr> operand() noexcept;
+    std::unique_ptr<Expr> operand();
 
-    std::unique_ptr<Expr> parse_expr(uint8_t min_precedence) noexcept;
+    std::unique_ptr<Expr> parse_expr(uint8_t min_precedence);
 
 public:
     explicit Parser(const std::span<const Token> tokens) : tokens(tokens), idx(0), len(tokens.size()) {
     }
 
-    std::vector<Ast> parse() noexcept;
+    std::vector<Ast> parse();
 };
 
 
