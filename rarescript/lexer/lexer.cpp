@@ -68,6 +68,22 @@ std::vector<Token> Lexer::tokenize() noexcept {
                 push_single(TokenKind::RightParenthesis);
                 break;
 
+            case '+':
+                push_single(TokenKind::Plus);
+                break;
+
+            case '-':
+                push_single(TokenKind::Minus);
+                break;
+
+            case '*':
+                push_single(TokenKind::Star);
+                break;
+
+            case '/':
+                push_single(TokenKind::Slash);
+                break;
+
             case '\n':
                 col = 1;
                 ++line;
