@@ -41,6 +41,7 @@ target_link_libraries(rpgen
 
 add_executable(rpgen_tests
         tests/lexer/lexer.cpp
+        tests/parser/parser.cpp
 )
 
 target_link_libraries(rpgen_tests
