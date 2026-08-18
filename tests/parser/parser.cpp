@@ -1,4 +1,3 @@
-
 //
 // Created by Nizam Mirza on 17/08/2026.
 //
@@ -26,7 +25,7 @@ TEST_CASE(
     "[parser]"
 ) {
     const std::string source =
-        "[game]";
+            "[game]";
 
     Lexer lexer(source);
     const auto tokens = lexer.tokenize();
@@ -36,7 +35,7 @@ TEST_CASE(
 
     REQUIRE(ast.size() == 1);
 
-    auto *segment = std::get<std::unique_ptr<SegmentBlock>>(ast[0].node).get();
+    auto *segment = std::get<std::unique_ptr<SegmentBlock> >(ast[0].node).get();
 
     REQUIRE(segment != nullptr);
     CHECK(segment->name == "game");
@@ -48,8 +47,8 @@ TEST_CASE(
     "[parser]"
 ) {
     const std::string source =
-        "[game]\n"
-        "new exp nat(0)";
+            "[game]\n"
+            "new exp nat(0)";
 
     Lexer lexer(source);
     const auto tokens = lexer.tokenize();
@@ -59,7 +58,7 @@ TEST_CASE(
 
     REQUIRE(ast.size() == 1);
 
-    auto *segment = std::get<std::unique_ptr<SegmentBlock>>(ast[0].node).get();
+    auto *segment = std::get<std::unique_ptr<SegmentBlock> >(ast[0].node).get();
 
     REQUIRE(segment != nullptr);
     CHECK(segment->name == "game");
@@ -67,9 +66,9 @@ TEST_CASE(
     REQUIRE(segment->children.size() == 1);
 
     auto *declaration =
-        std::get<std::unique_ptr<NewDeclaration>>(
-            segment->children[0].node
-        ).get();
+            std::get<std::unique_ptr<NewDeclaration> >(
+                segment->children[0].node
+            ).get();
 
     REQUIRE(declaration != nullptr);
 
@@ -83,9 +82,9 @@ TEST_CASE(
     "[parser]"
 ) {
     const std::string source =
-        "[game]\n"
-        "new exp nat(0)\n"
-        "set exp 100";
+            "[game]\n"
+            "new exp nat(0)\n"
+            "set exp 100";
 
     Lexer lexer(source);
     const auto tokens = lexer.tokenize();
@@ -95,7 +94,7 @@ TEST_CASE(
 
     REQUIRE(ast.size() == 1);
 
-    auto *segment = std::get<std::unique_ptr<SegmentBlock>>(ast[0].node).get();
+    auto *segment = std::get<std::unique_ptr<SegmentBlock> >(ast[0].node).get();
 
     REQUIRE(segment != nullptr);
     CHECK(segment->name == "game");
@@ -103,9 +102,9 @@ TEST_CASE(
     REQUIRE(segment->children.size() == 2);
 
     auto *new_decl =
-        std::get<std::unique_ptr<NewDeclaration>>(
-            segment->children[0].node
-        ).get();
+            std::get<std::unique_ptr<NewDeclaration> >(
+                segment->children[0].node
+            ).get();
 
     REQUIRE(new_decl != nullptr);
 
@@ -114,9 +113,9 @@ TEST_CASE(
     REQUIRE(new_decl->value != nullptr);
 
     auto *set_decl =
-        std::get<std::unique_ptr<SetDeclaration>>(
-            segment->children[1].node
-        ).get();
+            std::get<std::unique_ptr<SetDeclaration> >(
+                segment->children[1].node
+            ).get();
 
     REQUIRE(set_decl != nullptr);
 
@@ -129,11 +128,11 @@ TEST_CASE(
     "[parser]"
 ) {
     const std::string source =
-        "[game]\n"
-        "new exp nat(0)\n"
-        "set exp 100\n"
-        "[player]\n"
-        "new hp nat(100)";
+            "[description]\n"
+            "new exp nat(0)\n"
+            "set exp 100\n"
+            "[game]\n"
+            "new hp nat(100)";
 
     Lexer lexer(source);
     const auto tokens = lexer.tokenize();
@@ -143,34 +142,34 @@ TEST_CASE(
 
     REQUIRE(ast.size() == 2);
 
-    auto *game =
-        std::get<std::unique_ptr<SegmentBlock>>(ast[0].node).get();
+    auto *description =
+            std::get<std::unique_ptr<SegmentBlock> >(ast[0].node).get();
 
-    REQUIRE(game != nullptr);
-    CHECK(game->name == "game");
+    REQUIRE(description != nullptr);
+    CHECK(description->name == "description");
 
-    REQUIRE(game->children.size() == 2);
+    REQUIRE(description->children.size() == 2);
     CHECK(
         std::holds_alternative<std::unique_ptr<NewDeclaration>>(
-            game->children[0].node
+            description->children[0].node
         )
     );
     CHECK(
         std::holds_alternative<std::unique_ptr<SetDeclaration>>(
-            game->children[1].node
+            description->children[1].node
         )
     );
 
-    auto *player =
-        std::get<std::unique_ptr<SegmentBlock>>(ast[1].node).get();
+    auto *game =
+            std::get<std::unique_ptr<SegmentBlock> >(ast[1].node).get();
 
-    REQUIRE(player != nullptr);
-    CHECK(player->name == "player");
+    REQUIRE(game != nullptr);
+    CHECK(game->name == "game");
 
-    REQUIRE(player->children.size() == 1);
+    REQUIRE(game->children.size() == 1);
     CHECK(
         std::holds_alternative<std::unique_ptr<NewDeclaration>>(
-            player->children[0].node
+            game->children[0].node
         )
     );
 }
@@ -180,8 +179,8 @@ TEST_CASE(
     "[parser][error]"
 ) {
     const std::string source =
-        "[game]\n"
-        "new exp";
+            "[game]\n"
+            "new exp";
 
     Lexer lexer(source);
     const auto tokens = lexer.tokenize();
@@ -199,8 +198,8 @@ TEST_CASE(
     "[parser][error]"
 ) {
     const std::string source =
-        "[game]\n"
-        "set exp";
+            "[game]\n"
+            "set exp";
 
     Lexer lexer(source);
     const auto tokens = lexer.tokenize();
@@ -218,8 +217,8 @@ TEST_CASE(
     "[parser][error]"
 ) {
     const std::string source =
-        "[game]\n"
-        "new exp nat";
+            "[game]\n"
+            "new exp nat";
 
     Lexer lexer(source);
     const auto tokens = lexer.tokenize();
