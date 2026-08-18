@@ -115,6 +115,8 @@ std::unique_ptr<Expr> Parser::parse_expr(const uint8_t min_precedence) {
 
     while (true) {
         if (peek() == TokenKind::Eof) break;
+        // Stop when reach newline
+        if (tokens[idx].location.s_line > left->source_location().e_line) break;
 
         const auto precedence = static_cast<uint8_t>(get_precedence(peek()));
 
@@ -186,6 +188,7 @@ std::vector<Ast> Parser::parse() {
                             // - when a valid assignment require `T(...)` syntax
                             //
                             // Solution: Make this function report an error
+                            throw std::runtime_error("Expected left parenthesis after type");
                         }
                         break;
                     }
